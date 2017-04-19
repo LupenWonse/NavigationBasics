@@ -15,10 +15,10 @@ public class CharacterNavigator : MonoBehaviour {
 		currentLocation.x = transform.position.x;
 		currentLocation.y = transform.position.z;
 
-		Vector2 target = new Vector2(2,2);
+		Vector2 target = new Vector2(5,5);
 
 		calculateMovement(currentLocation,target);
-
+		GetComponent<CharacterMover>().navigationPath = navigationPath;
 		//TODO DEBUG
 		foreach(Vector2 positionToVisit in navigationPath){
 			print(positionToVisit.ToString());
