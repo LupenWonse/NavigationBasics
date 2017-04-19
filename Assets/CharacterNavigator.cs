@@ -18,7 +18,7 @@ public class CharacterNavigator : MonoBehaviour {
 
 		Vector2 target = new Vector2(5,0);
 
-		calculateMovement(currentLocation,target);
+		calculateMovement(currentLocation, currentLocation,target);
 		GetComponent<CharacterMover>().navigationPath = navigationPath;
 		//TODO DEBUG
 		foreach(Vector2 positionToVisit in navigationPath){
@@ -37,18 +37,18 @@ public class CharacterNavigator : MonoBehaviour {
 	}
 
 	// Finds all possible movement possibilities for a given location
-	List<Vector2> findPossibleNeighbours(Vector2 position){
+	List<Vector2> findPossibleNeighbours(Vector2 position, Vector2 previousPosition){
 		List<Vector2> neighbours = new List<Vector2>();
 		Vector2 possiblePosition;
 		for (int row = -1; row <= 1; row++){
 			for (int col = -1; col <=1; col++){
 				
-				if (row == 0 && col == 0){
-					continue;
-				}
-				
 				possiblePosition.x = position.x + col * stepSize;
 				possiblePosition.y = position.y + row * stepSize;
+
+				if (possiblePosition == position || possiblePosition == previousPosition){
+					continue;
+				}
 
 				if (isPositionFree(possiblePosition)){
 					neighbours.Add(possiblePosition);
@@ -65,8 +65,8 @@ public class CharacterNavigator : MonoBehaviour {
 		return !(Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (0.4f,0.4f,0.4f),Quaternion.identity,obstacles));
 	}
 
-	void calculateMovement(Vector2 currentLocation, Vector2 target){
-		List<Vector2> neighbours = findPossibleNeighbours(currentLocation);
+	void calculateMovement(Vector2 currentLocation, Vector2 previousPosition, Vector2 target){
+		List<Vector2> neighbours = findPossibleNeighbours(currentLocation, previousPosition);
 
 		// For all possible movement find the costs
 		float minCost = float.MaxValue;
@@ -85,7 +85,7 @@ public class CharacterNavigator : MonoBehaviour {
 			// Choose the location with the lowest cost
 			// And repeat recursively
 			navigationPath.Add(nextLocation);
-			calculateMovement(nextLocation,target);
+			calculateMovement(nextLocation,previousPosition,target);
 		}
 	}
 
