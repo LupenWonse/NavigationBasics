@@ -6,10 +6,23 @@ using UnityEngine;
 public class CharacterNavigator : MonoBehaviour {
 
 	private float stepSize = 1.0f;
+	private List<Vector2> navigationPath = new List<Vector2>();
 
 	// Use this for initialization
 	void Start () {
-		calculateMovement(new Vector2(2,2));
+
+		Vector2 currentLocation;
+		currentLocation.x = transform.position.x;
+		currentLocation.y = transform.position.z;
+
+		Vector2 target = new Vector2(2,2);
+
+		calculateMovement(currentLocation,target);
+
+		//TODO DEBUG
+		foreach(Vector2 positionToVisit in navigationPath){
+			print(positionToVisit.ToString());
+		}
 	}
 	
 	// Update is called once per frame
@@ -44,37 +57,39 @@ public class CharacterNavigator : MonoBehaviour {
 		return true;
 	}
 
-	void calculateMovement(Vector2 target){
+	void calculateMovement(Vector2 currentLocation, Vector2 target){
 		// Get current location
-		Vector2 currentLocation;
-		currentLocation.x = transform.position.x;
-		currentLocation.y = transform.position.z;
+		//Vector2 currentLocation;
+		//currentLocation.x = transform.position.x;
+		//currentLocation.y = transform.position.z;
 		// From the current location find all possible movements
 		List<Vector2> neighbours = findPossibleNeighbours(currentLocation);
 
-
+		// For all possible movement find the costs
 		float minCost = float.MaxValue;
 		Vector2 nextLocation = Vector2.zero;
-		//DEBUG
 		foreach(Vector2 neighbour in neighbours){
-			print(neighbour.ToString());
-			print(calculateLocationCost(neighbour,target).ToString());
-
 			if (calculateLocationCost(neighbour,target) < minCost){
 				minCost = calculateLocationCost(neighbour,target);
 				nextLocation = neighbour;
 			}
 		}
 
-		print(nextLocation.ToString());
-
-
-		// For all possible movement find the costs
-
-		// Choose the location with the lowest cost
-
-		// Repeat until 
+		if (nextLocation.Equals(target)){
+			// We reached our target
+			navigationPath.Add(target);
+		} else {
+			// Choose the location with the lowest cost
+			// And repeat recursively
+			navigationPath.Add(nextLocation);
+			calculateMovement(nextLocation,target);
+		}
 	}
+
+    private bool isTarget(Vector2 nextLocation, Vector2 target)
+    {
+        return (nextLocation.Equals(target));
+    }
 
     private float calculateLocationCost(Vector2 position, Vector2 target)
     {
