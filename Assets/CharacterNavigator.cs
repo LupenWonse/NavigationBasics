@@ -7,6 +7,7 @@ public class CharacterNavigator : MonoBehaviour {
 
 	private float stepSize = 1.0f;
 	private List<Vector2> navigationPath = new List<Vector2>();
+	[SerializeField] LayerMask obstacles;
 
 	// Use this for initialization
 	void Start () {
@@ -15,7 +16,7 @@ public class CharacterNavigator : MonoBehaviour {
 		currentLocation.x = transform.position.x;
 		currentLocation.y = transform.position.z;
 
-		Vector2 target = new Vector2(5,5);
+		Vector2 target = new Vector2(5,0);
 
 		calculateMovement(currentLocation,target);
 		GetComponent<CharacterMover>().navigationPath = navigationPath;
@@ -27,7 +28,7 @@ public class CharacterNavigator : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		print(Physics.CheckBox(new Vector3(1,1,1),new Vector3(0.5f,0.5f,0.5f),Quaternion.identity,obstacles));
 	}
 
 	// Sets a new target for the character
@@ -41,11 +42,18 @@ public class CharacterNavigator : MonoBehaviour {
 		Vector2 possiblePosition;
 		for (int row = -1; row <= 1; row++){
 			for (int col = -1; col <=1; col++){
+				
+				if (row == 0 && col == 0){
+					continue;
+				}
+				
 				possiblePosition.x = position.x + col * stepSize;
 				possiblePosition.y = position.y + row * stepSize;
 
 				if (isPositionFree(possiblePosition)){
 					neighbours.Add(possiblePosition);
+				} else {
+					print("NOT FREE:" + possiblePosition.ToString());
 				}
 
 			}
@@ -54,15 +62,10 @@ public class CharacterNavigator : MonoBehaviour {
 	}
 
 	bool isPositionFree(Vector2 position){
-		return true;
+		return !(Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (0.4f,0.4f,0.4f),Quaternion.identity,obstacles));
 	}
 
 	void calculateMovement(Vector2 currentLocation, Vector2 target){
-		// Get current location
-		//Vector2 currentLocation;
-		//currentLocation.x = transform.position.x;
-		//currentLocation.y = transform.position.z;
-		// From the current location find all possible movements
 		List<Vector2> neighbours = findPossibleNeighbours(currentLocation);
 
 		// For all possible movement find the costs
