@@ -97,6 +97,7 @@ public class CharacterNavigator : MonoBehaviour {
 
     private float calculateLocationCost(Vector2 position, Vector2 target)
     {
-        return (target - position).magnitude;
+		// Eucledian heurustic
+		return (target - position).magnitude;
     }
 }
