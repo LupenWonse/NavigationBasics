@@ -6,7 +6,12 @@ public class CharacterMover : MonoBehaviour {
 
 	[SerializeField] private float movementSpeed;
 	public List<Vector2> navigationPath = new List<Vector2>();
+	private new Rigidbody rigidbody;
 	
+	void Start() {
+		rigidbody = GetComponent<Rigidbody>();
+	}
+
 	// Update is called once per frame
 	void FixedUpdate () {
 		Vector3 target = transform.position;
@@ -17,16 +22,15 @@ public class CharacterMover : MonoBehaviour {
 			target.z = navigationPath[0].y;
 			
 		//	transform.position = Vector3.MoveTowards(transform.position,target,Time.deltaTime * movementSpeed);
-			GetComponent<Rigidbody>().MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
+			rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
 
-			if (transform.position.Equals(target)){
+			if ((transform.position-target).magnitude<0.1){
 				navigationPath.RemoveAt(0);
 			}
 		}
 	}
 
 	public void OnCollisionEnter (Collision collision){
-		print("Collision");
-		GetComponent<CharacterNavigator>().objectBlocked(navigationPath[navigationPath.Count-1]);
+		GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
 	}
 }
