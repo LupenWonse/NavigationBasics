@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class CharacterNavigator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		calculateMovement(Vector2.zero);
+		calculateMovement(new Vector2(2,2));
 	}
 	
 	// Update is called once per frame
@@ -51,10 +52,22 @@ public class CharacterNavigator : MonoBehaviour {
 		// From the current location find all possible movements
 		List<Vector2> neighbours = findPossibleNeighbours(currentLocation);
 
+
+		float minCost = float.MaxValue;
+		Vector2 nextLocation = Vector2.zero;
 		//DEBUG
-		foreach(Vector2 position in neighbours){
-			print(position.ToString());
+		foreach(Vector2 neighbour in neighbours){
+			print(neighbour.ToString());
+			print(calculateLocationCost(neighbour,target).ToString());
+
+			if (calculateLocationCost(neighbour,target) < minCost){
+				minCost = calculateLocationCost(neighbour,target);
+				nextLocation = neighbour;
+			}
 		}
+
+		print(nextLocation.ToString());
+
 
 		// For all possible movement find the costs
 
@@ -62,4 +75,9 @@ public class CharacterNavigator : MonoBehaviour {
 
 		// Repeat until 
 	}
+
+    private float calculateLocationCost(Vector2 position, Vector2 target)
+    {
+        return (target - position).magnitude;
+    }
 }
