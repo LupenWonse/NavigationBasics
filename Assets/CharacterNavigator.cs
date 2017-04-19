@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class CharacterNavigator : MonoBehaviour {
 
+	[SerializeField] private int maxIterations = 0;
+	private int iterations = 0;
 	private float stepSize = 1.0f;
 	private List<Vector2> navigationPath = new List<Vector2>();
 	[SerializeField] LayerMask obstacles;
@@ -18,22 +20,26 @@ public class CharacterNavigator : MonoBehaviour {
 
 		Vector2 target = new Vector2(5,0);
 
-		calculateMovement(currentLocation, currentLocation,target);
-		GetComponent<CharacterMover>().navigationPath = navigationPath;
-		//TODO DEBUG
-		foreach(Vector2 positionToVisit in navigationPath){
-			print(positionToVisit.ToString());
+		if(calculateMovement(currentLocation, currentLocation,target)){
+			GetComponent<CharacterMover>().navigationPath = navigationPath;
 		}
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		print(Physics.CheckBox(new Vector3(1,1,1),new Vector3(0.5f,0.5f,0.5f),Quaternion.identity,obstacles));
 	}
 
 	// Sets a new target for the character
 	void setNewTarget(Vector2 target){
 
+	}
+
+	public void objectBlocked(Vector2 target){
+		navigationPath = new List<Vector2>();
+		
+		Vector2 currentLocation;
+		currentLocation.x = transform.position.x;
+		currentLocation.y = transform.position.z;
+
+		if(calculateMovement(currentLocation, currentLocation, target)){
+			GetComponent<CharacterMover>().navigationPath = navigationPath;
+		}
 	}
 
 	// Finds all possible movement possibilities for a given location
@@ -52,10 +58,7 @@ public class CharacterNavigator : MonoBehaviour {
 
 				if (isPositionFree(possiblePosition)){
 					neighbours.Add(possiblePosition);
-				} else {
-					print("NOT FREE:" + possiblePosition.ToString());
 				}
-
 			}
 		}
 		return neighbours;
@@ -65,7 +68,13 @@ public class CharacterNavigator : MonoBehaviour {
 		return !(Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (0.4f,0.4f,0.4f),Quaternion.identity,obstacles));
 	}
 
-	void calculateMovement(Vector2 currentLocation, Vector2 previousPosition, Vector2 target){
+	bool calculateMovement(Vector2 currentLocation, Vector2 previousPosition, Vector2 target){
+		iterations ++;
+		if (iterations > maxIterations){
+			iterations = 0;
+			return false;
+		}
+
 		List<Vector2> neighbours = findPossibleNeighbours(currentLocation, previousPosition);
 
 		// For all possible movement find the costs
@@ -81,11 +90,14 @@ public class CharacterNavigator : MonoBehaviour {
 		if (isTarget(nextLocation,target)){
 			// We reached our target
 			navigationPath.Add(target);
+			iterations = 0;
+			return true;
 		} else {
 			// Choose the location with the lowest cost
 			// And repeat recursively
 			navigationPath.Add(nextLocation);
-			calculateMovement(nextLocation,previousPosition,target);
+			print(nextLocation.ToString());
+			return calculateMovement(nextLocation,currentLocation,target);
 		}
 	}
 
