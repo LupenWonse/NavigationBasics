@@ -75,7 +75,7 @@ public class CharacterNavigator : MonoBehaviour {
 			}
 		}
 
-		if (nextLocation.Equals(target)){
+		if (isTarget(nextLocation,target)){
 			// We reached our target
 			navigationPath.Add(target);
 		} else {
@@ -86,9 +86,11 @@ public class CharacterNavigator : MonoBehaviour {
 		}
 	}
 
+	// Use a isTarget function to make sure a location is within half a step size
+	// of the target
     private bool isTarget(Vector2 nextLocation, Vector2 target)
     {
-        return (nextLocation.Equals(target));
+        return ((target-nextLocation).magnitude < stepSize/2);
     }
 
     private float calculateLocationCost(Vector2 position, Vector2 target)
