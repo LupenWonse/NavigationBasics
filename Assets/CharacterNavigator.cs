@@ -29,7 +29,6 @@ public class CharacterNavigator : MonoBehaviour {
 		currentLocation.x = transform.position.x;
 		currentLocation.y = transform.position.z;
 		
-		calculateMovement(currentLocation,target);
 		if(calculateMovement(currentLocation, target)) {
 			print("setting new Target : " + target.ToString());
 			GetComponent<CharacterMover>().navigationPath = navigationPath;
@@ -48,6 +47,8 @@ public class CharacterNavigator : MonoBehaviour {
 	}
 
 	void updateNeighbours(Node parent , Vector2 target){
+		print("Updating Neighbours at : " + parent.position.ToString() );
+		
 		Node neighbour = new Node();
 		
 		for (int row = -1; row <= 1; row++){
@@ -77,7 +78,7 @@ public class CharacterNavigator : MonoBehaviour {
 					}
 					openNodes.Add(neighbour);
 				} 
-				// Update node cost
+				// Open new node
 				else {
 					neighbour.cost = parent.cost +1;
 					neighbour.distance = calculateLocationCost(neighbour.position,target);
@@ -96,7 +97,8 @@ public class CharacterNavigator : MonoBehaviour {
 
 		Node startNode = new Node();
 		startNode.position =start;
-		startNode.cost = calculateLocationCost(start,target);
+		startNode.cost = 0;
+		startNode.distance = calculateLocationCost(start,target);
 
 
 		openNodes.Add(startNode);
@@ -104,6 +106,7 @@ public class CharacterNavigator : MonoBehaviour {
 		while (openNodes.Count > 0){
 			Node current;
 			current = findNextNode();
+			print("Current Node: " + current.position.ToString());
 				if (isTarget(current.position,target)){
 					// SUCCESS
 					current.position = target;
@@ -193,8 +196,8 @@ public class CharacterNavigator : MonoBehaviour {
 		Node minNode = new Node();
 		float minCost = float.MaxValue;
         foreach(Node node in openNodes){
-			if (node.cost < minCost){
-				minCost = node.cost;
+			if (node.cost + node.distance < minCost){
+				minCost = node.cost + node.distance;
 				minNode = node;
 			}
 		}
