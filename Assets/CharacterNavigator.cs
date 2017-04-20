@@ -5,91 +5,137 @@ using UnityEngine;
 
 public class CharacterNavigator : MonoBehaviour {
 
+	private struct Node{
+		public float cost;
+		public float distance;
+		public Vector2 position;
+		public Vector2 previous;
+	}
+
+	private List<Node> openNodes, closedNodes;
 	[SerializeField] private int maxIterations = 0;
 	private int iterations = 0;
-	private float stepSize = 1.0f;
+	private float stepSize =1f;
 	private List<Vector2> navigationPath = new List<Vector2>();
 	public LayerMask obstacles;
-
-	// Use this for initialization
-	void Start () {
-	}
 
 	// Sets a new target for the character
 	public void setNewTarget(Vector2 target){
 		navigationPath = new List<Vector2>();
+		openNodes = new List<Node>();
+		closedNodes = new List<Node>();
 		
 		Vector2 currentLocation;
 		currentLocation.x = transform.position.x;
 		currentLocation.y = transform.position.z;
-		if(calculateMovement(currentLocation, currentLocation, target)){
+		
+		calculateMovement(currentLocation,target);
+		if(calculateMovement(currentLocation, target)) {
+			print("setting new Target : " + target.ToString());
 			GetComponent<CharacterMover>().navigationPath = navigationPath;
 		} else {
 			Debug.LogWarning("Navigation Failed. Check iteration Count Or Loop");
-			calculateMovement(currentLocation, currentLocation, target);
 		}
 	}
 
-	// Finds all possible movement possibilities for a given location
-	List<Vector2> findPossibleNeighbours(Vector2 position, Vector2 previousPosition){
-		List<Vector2> neighbours = new List<Vector2>();
-		Vector2 possiblePosition;
+    private void generateNodeGraph()
+    {
+        
+    }
+
+	void Start(){
+		
+	}
+
+	void updateNeighbours(Node parent , Vector2 target){
+		Node neighbour = new Node();
+		
 		for (int row = -1; row <= 1; row++){
 			for (int col = -1; col <=1; col++){
+				neighbour.position.x = parent.position.x + col * stepSize;
+				neighbour.position.y = parent.position.y + row * stepSize;
 				
-				possiblePosition.x = position.x + col * stepSize;
-				possiblePosition.y = position.y + row * stepSize;
-
-				if (possiblePosition == position || possiblePosition == previousPosition){
+				// Skip the same position
+				if (row == 0 && col == 0){
+					continue;
+				} 
+				// Already evaluated or unavailable
+				else if (isNodeClosed(neighbour)){
 					continue;
 				}
-
-				if (isPositionFree(possiblePosition)){
-					neighbours.Add(possiblePosition);
+				// Position is blocked by some object
+				else if (!isPositionFree(neighbour.position)){
+					closedNodes.Add(neighbour);
+				}
+				// Id the node is already open update the cost
+				else if (isNodeOpen(neighbour)){
+					neighbour = getOpenNode(neighbour);
+					openNodes.Remove(neighbour);
+					if (neighbour.cost > parent.cost + 1){
+						neighbour.cost = parent.cost +1;
+						neighbour.previous = parent.position;
+					}
+					openNodes.Add(neighbour);
+				} 
+				// Update node cost
+				else {
+					neighbour.cost = parent.cost +1;
+					neighbour.distance = calculateLocationCost(neighbour.position,target);
+					neighbour.previous = parent.position;
+					openNodes.Add(neighbour);
 				}
 			}
 		}
-		return neighbours;
 	}
 
 	bool isPositionFree(Vector2 position){
 		return !Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (0.4f,0.4f,0.4f),Quaternion.identity,obstacles);
 	}
 
-	bool calculateMovement(Vector2 currentLocation, Vector2 previousPosition, Vector2 target){
-		iterations ++;
-		if (iterations > maxIterations){
-			iterations = 0;
-			return false;
-		}
+	bool calculateMovement(Vector2 start, Vector2 target){
 
-		List<Vector2> neighbours = findPossibleNeighbours(currentLocation, previousPosition);
+		Node startNode = new Node();
+		startNode.position =start;
+		startNode.cost = calculateLocationCost(start,target);
 
-		// For all possible movement find the costs
-		float minCost = float.MaxValue;
-		Vector2 nextLocation = Vector2.zero;	
-		foreach(Vector2 neighbour in neighbours){
-			if (calculateLocationCost(neighbour,target) < minCost){
-				minCost = calculateLocationCost(neighbour,target);
-				nextLocation = neighbour;
+
+		openNodes.Add(startNode);
+
+		while (openNodes.Count > 0){
+			Node current;
+			current = findNextNode();
+				if (isTarget(current.position,target)){
+					// SUCCESS
+					closedNodes.Add(current);
+					constructPath(current,start);
+					return true;
+				}
+			updateNeighbours(current,target);
+			openNodes.Remove(current);
+			closedNodes.Add(current);
+
+			iterations ++;
+			if (iterations > maxIterations){
+				iterations = 0;
+				return false;
 			}
 		}
-
-		if (isTarget(nextLocation,target)){
-			// We reached our target
-			navigationPath.Add(target);
-			iterations = 0;
-			return true;
-		} else {
-			// Choose the location with the lowest cost
-			// And repeat recursively
-			navigationPath.Add(nextLocation);
-			return calculateMovement(nextLocation,currentLocation,target);
-		}
+		return false;
 	}
 
-	// Use a isTarget function to make sure a location is within half a step size
-	// of the target
+    private void constructPath(Node final, Vector2 start)
+    {
+        navigationPath = new List<Vector2>();
+		navigationPath.Add(final.position);
+		while(final.position != start){
+			final.position = final.previous;
+			final = getClosedNode(final);
+			navigationPath.Insert(0,final.position);
+		}
+    }
+
+    // Use a isTarget function to make sure a location is within half a step size
+    // of the target
     private bool isTarget(Vector2 nextLocation, Vector2 target)
     {
         return ((target-nextLocation).magnitude -0.1f <= stepSize/2);
@@ -100,4 +146,57 @@ public class CharacterNavigator : MonoBehaviour {
 		// Eucledian heurustic
 		return (target - position).magnitude;
     }
+
+    private Node getOpenNode(Node neighbour)
+    {
+        foreach(Node currentNode in openNodes){
+			if (currentNode.position == neighbour.position){
+				return currentNode;
+			}
+		}
+		throw new Exception();
+    }
+
+    private Node getClosedNode(Node neighbour)
+    {
+        foreach(Node currentNode in closedNodes){
+			if (currentNode.position == neighbour.position){
+				return currentNode;
+			}
+		}
+		throw new Exception();
+    }
+
+    private bool isNodeOpen(Node neighbour)
+    {
+        foreach(Node currentNode in openNodes){
+			if (currentNode.position == neighbour.position){
+				return true;
+			}
+		}
+		return false;
+    }
+
+    private bool isNodeClosed(Node neighbour)
+    {
+        foreach(Node currentNode in closedNodes){
+			if (currentNode.position == neighbour.position){
+				return true;
+			}
+		}
+		return false;
+    }
+
+    private Node findNextNode()
+    {
+		Node minNode = new Node();
+		float minCost = float.MaxValue;
+        foreach(Node node in openNodes){
+			if (node.cost < minCost){
+				minCost = node.cost;
+				minNode = node;
+			}
+		}
+	return minNode;
+	}
 }
