@@ -47,8 +47,6 @@ public class CharacterNavigator : MonoBehaviour {
 	}
 
 	void updateNeighbours(Node parent , Vector2 target){
-		print("Updating Neighbours at : " + parent.position.ToString() );
-		
 		Node neighbour = new Node();
 		
 		for (int row = -1; row <= 1; row++){
@@ -106,7 +104,6 @@ public class CharacterNavigator : MonoBehaviour {
 		while (openNodes.Count > 0){
 			Node current;
 			current = findNextNode();
-			print("Current Node: " + current.position.ToString());
 				if (isTarget(current.position,target)){
 					// SUCCESS
 					current.position = target;

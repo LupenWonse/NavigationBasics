@@ -21,16 +21,18 @@ public class CharacterMover : MonoBehaviour {
 			target.x = navigationPath[0].x;
 			target.z = navigationPath[0].y;
 			
-		//	transform.position = Vector3.MoveTowards(transform.position,target,Time.deltaTime * movementSpeed);
-			rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
-
+		// New Location
+			Vector3 nextLocation = Vector3.MoveTowards(transform.position,target,1f);
+		
+			if (Physics.CheckBox(nextLocation,new Vector3(0.4f,0.4f,0.4f),Quaternion.identity,LayerMask.GetMask(new string[] {"Obstacles"}))){
+				GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
+			} else {
+				rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
+			}
+			
 			if ((transform.position-target).magnitude<0.1){
 				navigationPath.RemoveAt(0);
 			}
 		}
-	}
-
-	public void OnCollisionEnter (Collision collision){
-		GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
 	}
 }
