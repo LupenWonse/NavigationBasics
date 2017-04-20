@@ -15,7 +15,7 @@ public class CharacterNavigator : MonoBehaviour {
 	private List<Node> openNodes, closedNodes;
 	[SerializeField] private int maxIterations = 0;
 	private int iterations = 0;
-	private float stepSize =1f;
+	[SerializeField] private float stepSize =1.0f;
 	private List<Vector2> navigationPath = new List<Vector2>();
 	public LayerMask obstacles;
 
@@ -89,7 +89,7 @@ public class CharacterNavigator : MonoBehaviour {
 	}
 
 	bool isPositionFree(Vector2 position){
-		return !Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (0.4f,0.4f,0.4f),Quaternion.identity,obstacles);
+		return !Physics.CheckBox(new Vector3(position.x,transform.position.y,position.y),new Vector3 (stepSize/2,0.5f,stepSize/2),Quaternion.identity,obstacles);
 	}
 
 	bool calculateMovement(Vector2 start, Vector2 target){
@@ -106,6 +106,7 @@ public class CharacterNavigator : MonoBehaviour {
 			current = findNextNode();
 				if (isTarget(current.position,target)){
 					// SUCCESS
+					current.position = target;
 					closedNodes.Add(current);
 					constructPath(current,start);
 					return true;
