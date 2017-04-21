@@ -34,7 +34,7 @@ private Vector2 currentPosition;
 		navigator.setNewTarget(waypoints[waypoint]);
 	}
 
-	void gotoNextWaypoint(){
+	public void gotoNextWaypoint(){
 		currentWaypoint++;
 
 		if (currentWaypoint >= waypoints.Length){

@@ -89,6 +89,10 @@ public class CharacterNavigator : MonoBehaviour {
 
 	bool calculateMovement(Vector2 start, Vector2 target){
 
+		if (!isPositionFree(target)){
+			return false;
+		}
+
 		Node startNode = new Node();
 		startNode.position =start;
 		startNode.cost = 0;
@@ -104,8 +108,7 @@ public class CharacterNavigator : MonoBehaviour {
 					// SUCCESS
 					current.position = target;
 					closedNodes.Add(current);
-					constructPath(current,start);
-					return true;
+					return constructPath(current,start);
 				}
 			updateNeighbours(current,target);
 			openNodes.Remove(current);
@@ -120,15 +123,21 @@ public class CharacterNavigator : MonoBehaviour {
 		return false;
 	}
 
-    private void constructPath(Node final, Vector2 start)
+    private bool constructPath(Node final, Vector2 start)
     {
-        navigationPath = new List<Vector2>();
-		navigationPath.Add(final.position);
-		while(final.position != start){
-			final.position = final.previous;
-			final = getClosedNode(final);
-			navigationPath.Insert(0,final.position);
+        try{
+			navigationPath = new List<Vector2>();
+			navigationPath.Add(final.position);
+			while(final.position != start){
+				final.position = final.previous;
+				final = getClosedNode(final);
+				navigationPath.Insert(0,final.position);
+			}
+			return true;
+		} catch {
+			return false;
 		}
+		
     }
 
     // Use a isTarget function to make sure a location is within half a step size

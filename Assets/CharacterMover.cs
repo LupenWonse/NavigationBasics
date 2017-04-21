@@ -22,6 +22,9 @@ public class CharacterMover : MonoBehaviour {
 			target.x = navigationPath[0].x;
 			target.y = transform.position.y;
 			target.z = navigationPath[0].y;
+		} else {
+			GetComponent<Patrol>().gotoNextWaypoint();
+			return;
 		}
 
 		// Check if we are on our target
