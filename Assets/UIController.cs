@@ -29,5 +29,24 @@ public void OnHeuristicsChange(int value){
 	}
 }
 
+public void OnCostChange(int value){
+	CharacterNavigator.Cost newCost =  CharacterNavigator.Cost.Greedy;
+	
+	switch(value){
+		case 0:
+		newCost = CharacterNavigator.Cost.Greedy;
+		break;
+		case 1:
+		newCost = CharacterNavigator.Cost.Astar;
+		break;
+		default:
+		Debug.LogWarning("Unhandled Cost Change");
+		break;
+	}
+
+	foreach(CharacterNavigator navigator in navigators){
+		navigator.cost = newCost;
+	}
+}
 
 }
