@@ -35,7 +35,7 @@ public class CharacterNavigator : MonoBehaviour {
 		currentLocation.y = transform.position.z;
 		
 		if(calculateMovement(currentLocation, target)) {
-			print("setting new Target : " + target.ToString());
+//			print("setting new Target : " + target.ToString());
 			GetComponent<CharacterMover>().navigationPath = navigationPath;
 		} else {
 			Debug.LogWarning("Navigation Failed. Check iteration Count Or Loop");
