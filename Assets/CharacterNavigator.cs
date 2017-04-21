@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class CharacterNavigator : MonoBehaviour {
 
+	public enum Cost {Greedy, Astar}
+	public enum Heuristic {Manhattan, Eucledian}
+	[SerializeField] public Cost cost = Cost.Astar;
+	[SerializeField] public Heuristic heurustic = Heuristic.Eucledian;
+
 	private struct Node{
 		public float cost;
 		public float distance;
@@ -35,15 +40,6 @@ public class CharacterNavigator : MonoBehaviour {
 		} else {
 			Debug.LogWarning("Navigation Failed. Check iteration Count Or Loop");
 		}
-	}
-
-    private void generateNodeGraph()
-    {
-        
-    }
-
-	void Start(){
-		
 	}
 
 	void updateNeighbours(Node parent , Vector2 target){
@@ -192,12 +188,26 @@ public class CharacterNavigator : MonoBehaviour {
     {
 		Node minNode = new Node();
 		float minCost = float.MaxValue;
-        foreach(Node node in openNodes){
-			if (node.cost + node.distance < minCost){
-				minCost = node.cost + node.distance;
-				minNode = node;
+        
+		switch (cost){
+		case Cost.Astar:
+			foreach(Node node in openNodes){
+				if (node.cost + node.distance < minCost){
+					minCost = node.cost + node.distance;
+					minNode = node;
+				}
 			}
+		break;
+		case Cost.Greedy:
+			foreach(Node node in openNodes){
+				if (node.distance < minCost){
+					minCost = node.distance;
+					minNode = node;
+				}
+			}
+		break;
 		}
-	return minNode;
+		
+		return minNode;
 	}
 }
