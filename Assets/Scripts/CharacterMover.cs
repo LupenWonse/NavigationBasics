@@ -7,14 +7,19 @@ public class CharacterMover : MonoBehaviour {
 	[SerializeField] private float movementSpeed;
 	public List<Vector2> navigationPath = new List<Vector2>();
 	private new Rigidbody rigidbody;
+	private Vector3 target;
 	
 	void Start() {
 		rigidbody = GetComponent<Rigidbody>();
 	}
 
+	void Update(){
+		rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
+	}
+
 	// Update is called once per frame
 	void FixedUpdate () {		
-		Vector3 target = new Vector3();
+		target = new Vector3();
 		//Vector2 currentPosition = new Vector2(transform.position.x,transform.position.z);
 		
 		// Check there are waypoints in the path
@@ -22,8 +27,11 @@ public class CharacterMover : MonoBehaviour {
 			target.x = navigationPath[0].x;
 			target.y = transform.position.y;
 			target.z = navigationPath[0].y;
-		} else {
+		} else if (GetComponent<Patrol>()) {
 			GetComponent<Patrol>().gotoNextWaypoint();
+			return;
+		} else {
+			target = transform.position;
 			return;
 		}
 
@@ -31,6 +39,11 @@ public class CharacterMover : MonoBehaviour {
 		if (transform.position == target){
 			//print("I am at target");
 			navigationPath.RemoveAt(0);
+			if (navigationPath.Count > 0){
+				target.x = navigationPath[0].x;
+				target.y = transform.position.y;
+				target.z = navigationPath[0].y;
+			}
 		} else {
 			Vector3 movementDirection = (target - transform.position).normalized;// * 0.425f;
 			Vector3 nextLocation = transform.position + movementDirection;
@@ -44,7 +57,7 @@ public class CharacterMover : MonoBehaviour {
 					return;
 				}
 			}
-		rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
+		
 		}
 	}
 }
