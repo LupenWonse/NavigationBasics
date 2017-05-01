@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 0.1
   navigationPath: []
+  target: {x: 0, y: 0, z: 0}
 --- !u!114 &114675074737898758
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -154,7 +155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cost: 0
   heurustic: 1
-  maxIterations: 10000
+  maxIterations: 1000
   stepSize: 1
   obstacles:
     serializedVersion: 2

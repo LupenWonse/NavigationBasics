@@ -7,7 +7,7 @@ public class CharacterMover : MonoBehaviour {
 	[SerializeField] private float movementSpeed;
 	public List<Vector2> navigationPath = new List<Vector2>();
 	private new Rigidbody rigidbody;
-	private Vector3 target;
+	public Vector3 target;
 	
 	void Start() {
 		rigidbody = GetComponent<Rigidbody>();
@@ -45,7 +45,7 @@ public class CharacterMover : MonoBehaviour {
 				target.z = navigationPath[0].y;
 			}
 		} else {
-			Vector3 movementDirection = (target - transform.position).normalized;// * 0.425f;
+			Vector3 movementDirection = (target - transform.position).normalized * 1.1f;
 			Vector3 nextLocation = transform.position + movementDirection;
 
 			// Check for collisions on our path
