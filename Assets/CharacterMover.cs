@@ -32,17 +32,19 @@ public class CharacterMover : MonoBehaviour {
 			//print("I am at target");
 			navigationPath.RemoveAt(0);
 		} else {
-			Vector3 movementDirection = (target - transform.position).normalized * 0.85f;
+			Vector3 movementDirection = (target - transform.position).normalized * 0.425f;
 			Vector3 nextLocation = transform.position + movementDirection;
-			if (Physics.CheckBox(nextLocation,new Vector3(0.05f,0.5f,0.05f),Quaternion.identity,LayerMask.GetMask(new string[] {"Obstacles","Agents"}))){
-				//print("I am moving To:" + nextLocation.ToString());
-				print("I think I will hit something At: " + nextLocation.ToString());
-				// Request new Path
-				GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
-			} else {
-				//print(target.ToString());
-				rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
+
+			// Check for collisions on our path
+			foreach (Collider collider in Physics.OverlapBox(nextLocation,new Vector3(0.05f,0.5f,0.05f),Quaternion.identity,LayerMask.GetMask(new string[] {"Obstacles","Agents"}))){
+				if (collider.gameObject != gameObject){
+					print("I think I will hit something At: " + nextLocation.ToString());
+					// Request new Path
+					GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
+					return;
+				}
 			}
+		rigidbody.MovePosition(Vector3.MoveTowards(transform.position,target,movementSpeed));
 		}
 	}
 }
