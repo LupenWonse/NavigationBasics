@@ -32,7 +32,7 @@ public class CharacterMover : MonoBehaviour {
 			//print("I am at target");
 			navigationPath.RemoveAt(0);
 		} else {
-			Vector3 movementDirection = (target - transform.position).normalized * 0.425f;
+			Vector3 movementDirection = (target - transform.position).normalized;// * 0.425f;
 			Vector3 nextLocation = transform.position + movementDirection;
 
 			// Check for collisions on our path
