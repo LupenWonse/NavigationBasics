@@ -45,12 +45,12 @@ public class CharacterMover : MonoBehaviour {
 				target.z = navigationPath[0].y;
 			}
 		} else {
-			Vector3 movementDirection = (target - transform.position).normalized * 1.1f;
+			Vector3 movementDirection = (target - transform.position);
 			Vector3 nextLocation = transform.position + movementDirection;
 
 			// Check for collisions on our path
-			foreach (Collider collider in Physics.OverlapBox(nextLocation,new Vector3(0.05f,0.5f,0.05f),Quaternion.identity,LayerMask.GetMask(new string[] {"Obstacles","Agents"}))){
-				if (collider.gameObject != gameObject){
+			foreach (RaycastHit hit in Physics.BoxCastAll(transform.position,new Vector3(0.05f,0.5f,0.05f),movementDirection,Quaternion.identity,1.0f,LayerMask.GetMask(new string[] {"Obstacles","Agents"}))){
+				if (hit.collider.gameObject != gameObject){
 					print("I think I will hit something At: " + nextLocation.ToString());
 					// Request new Path
 					GetComponent<CharacterNavigator>().setNewTarget(navigationPath[navigationPath.Count-1]);
